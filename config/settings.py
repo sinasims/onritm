@@ -46,6 +46,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'api.middleware.APIKeyMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -176,3 +178,13 @@ STORAGES = {
 # کلاس‌های استوریج سفارشی برای فایل‌های عمومی و خصوصی
 DEFAULT_FILE_STORAGE = 'storage_backends.PublicMediaStorage' # برای فیلدهایی که استوریج خاصی براشون تعریف نکردیم (مثلاً کاور)
 PRIVATE_FILE_STORAGE = 'storage_backends.PrivateMediaStorage' # برای فایل‌های خصوصی (فایل اصلی MP3)
+
+# تنظیمات CORS برای ارتباط با Next.js
+CORS_ALLOW_ALL_ORIGINS = True  # فقط برای توسعه
+# یا برای تولید:
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:5500",
+    "https://yourdomain.com",
+]
+API_SECRET_KEY = 'sinarahmani123456789'
