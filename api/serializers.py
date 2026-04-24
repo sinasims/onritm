@@ -47,9 +47,9 @@ class TrackDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Track
-        # fields = ['id', 'title_fa', 'title_en', 'singer', 'mood', 'genre', 'price', 'cover_image', 'sample_file', 'instrumental_file', 'original_file', 'description_fa', 'description_en', 'created_at']
+        # fields = ['id', 'title_fa', 'title_en', 'singer', 'mood', 'genre', 'price', 'cover_image', 'sample_file', 'instrumental_file', 'original_file', 'created_at']
         # remove instrumental_file برای مخفی کردن آدرس فایل
-        fields = ['id', 'title_fa', 'title_en', 'singer', 'mood', 'genre', 'price', 'cover_image', 'sample_file', 'original_file', 'description_fa', 'description_en', 'created_at']
+        fields = ['id', 'title_fa', 'title_en', 'singer', 'mood', 'genre', 'price', 'cover_image', 'sample_file', 'original_file', 'created_at']
         
 
 from shop.models import Cart, CartItem
