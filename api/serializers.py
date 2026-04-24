@@ -47,4 +47,32 @@ class TrackDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Track
-        fields = ['id', 'title_fa', 'title_en', 'singer', 'mood', 'genre', 'price', 'cover_image', 'sample_file', 'instrumental_file', 'original_file', 'description_fa', 'description_en', 'created_at']
+        # fields = ['id', 'title_fa', 'title_en', 'singer', 'mood', 'genre', 'price', 'cover_image', 'sample_file', 'instrumental_file', 'original_file', 'description_fa', 'description_en', 'created_at']
+        # remove instrumental_file برای مخفی کردن آدرس فایل
+        fields = ['id', 'title_fa', 'title_en', 'singer', 'mood', 'genre', 'price', 'cover_image', 'sample_file', 'original_file', 'description_fa', 'description_en', 'created_at']
+        
+
+from shop.models import Cart, CartItem
+
+class CartItemSerializer(serializers.ModelSerializer):
+    track_title = serializers.CharField(source='track.title_fa', read_only=True)
+    track_price = serializers.IntegerField(source='track.price', read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'track', 'track_title', 'quantity', 'track_price', 'total_price']
+
+    def get_total_price(self, obj):
+        return obj.get_total_price()
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'items', 'total_price', 'created_at', 'updated_at']
+
+    def get_total_price(self, obj):
+        return obj.get_total_price()
