@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'shop',
     'accounts',
+    'payment',
     'storages', # ArvanCloud Storage S3
 ]
 
@@ -187,9 +188,26 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",
     "https://yourdomain.com",
 ]
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    # آدرس سایت شما در هاست
+]
+
 API_SECRET_KEY = 'sinarahmani123456789'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 12,
 }
+
+ZARINPAL_CONFIG = {
+    "MERCHANT_ID": "f61e1794-23aa-4367-adf9-b37b3f56fa9f",
+    "REQUEST_URL": "https://sandbox.zarinpal.com/pg/v4/payment/request.json",
+    "VERIFY_URL": "https://sandbox.zarinpal.com/pg/v4/payment/verify.json",
+    "STARTPAY_URL": "https://sandbox.zarinpal.com/pg/StartPay/",
+    # "REQUEST_URL": "https://api.zarinpal.com/pg/v4/payment/request.json",
+    # "VERIFY_URL": "https://api.zarinpal.com/pg/v4/payment/verify.json",
+    # "STARTPAY_URL": "https://www.zarinpal.com/pg/StartPay/",
+}
+
