@@ -128,3 +128,69 @@ class RemoveFromCartView(APIView):
         item = get_object_or_404(CartItem, id=item_id, cart=cart)
         item.delete()
         return Response({'message': 'removed'}, status=status.HTTP_200_OK)
+
+# api/views.py (قسمت اضافه شده)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.db import transaction
+from shop.models import Cart, Order, OrderItem
+from .serializers import CheckoutSerializer, OrderSerializer
+
+class CheckoutView(APIView):
+    def get_cart(self, request):
+        # همان منطقی که در CartView استفاده کردیم
+        if request.user.is_authenticated:
+            cart, _ = Cart.objects.get_or_create(user=request.user, session_key=None)
+        else:
+            session_key = request.session.session_key
+            if not session_key:
+                request.session.create()
+                session_key = request.session.session_key
+            cart, _ = Cart.objects.get_or_create(session_key=session_key, user=None)
+        return cart
+
+    @transaction.atomic
+    def post(self, request):
+        cart = self.get_cart(request)
+        if not cart.items.exists():
+            return Response({'error': 'سبد خرید شما خالی است'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CheckoutSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        total_price = cart.get_total_price()
+
+        # ایجاد سفارش
+        order = Order.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            session_key=request.session.session_key if not request.user.is_authenticated else None,
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            email=data.get('email', ''),
+            phone_number=data['phone_number'],
+            address=data.get('address', ''),
+            total_price=total_price,
+            status='pending',
+        )
+
+        # انتقال آیتم‌های سبد به OrderItem
+        for cart_item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                track=cart_item.track,
+                price_at_purchase=cart_item.track.price,
+                quantity=cart_item.quantity,
+            )
+
+        # خالی کردن سبد خرید
+        cart.items.all().delete()
+
+        # برگرداندن اطلاعات سفارش
+        order_serializer = OrderSerializer(order)
+        return Response(order_serializer.data, status=status.HTTP_201_CREATED)
+    
+
+    

@@ -76,3 +76,19 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, obj):
         return obj.get_total_price()
+    
+# api/serializers.py
+from rest_framework import serializers
+from shop.models import Order
+
+class CheckoutSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=100)
+    last_name = serializers.CharField(max_length=100)
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(max_length=15)
+    address = serializers.CharField(required=False, allow_blank=True)
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'total_price', 'status', 'created_at']

@@ -3,8 +3,10 @@ from .views import (
     SingerListView, SingerDetailView,
     TrackListView, TrackDetailView,
     MoodListView, GenreListView,
-    CartView, AddToCartView, RemoveFromCartView
+    CartView, AddToCartView, RemoveFromCartView,
+    CheckoutView
 )
+from shop.views import DownloadTrackView
 
 urlpatterns = [
     path('singers/', SingerListView.as_view(), name='singer-list'),
@@ -17,4 +19,8 @@ urlpatterns = [
     path('cart/', CartView.as_view(), name='cart'),
     path('cart/add/', AddToCartView.as_view(), name='cart-add'),
     path('cart/remove/', RemoveFromCartView.as_view(), name='cart-remove'),
+
+    path('checkout/', CheckoutView.as_view(), name='checkout'),
+
+    path('download/<int:order_item_id>/', DownloadTrackView.as_view(), name='download'),
 ]

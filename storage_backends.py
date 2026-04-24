@@ -3,14 +3,19 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.conf import settings
 
 class PrivateMediaStorage(S3Boto3Storage):
-    """
-    این کلاس، استوریج مخصوص فایل‌های خصوصی مثل MP3 بی‌کلام است.
-    فایل‌هایی که از این مسیر ذخیره می‌شن، مستقیماً در دسترس نیستن.
-    """
-    location = 'private'  # فایل‌های خصوصی در پوشه 'private' باکت ذخیره می‌شن
-    default_acl = 'private'  # دسترسی پیش‌فرض روی خصوصی تنظیم میشه
-    file_overwrite = False    # از بازنویسی فایل‌ها جلوگیری میکنه
-    custom_domain = False     # از دامنه اختصاصی آرون استفاده نمیشه
+    location = 'private'
+    default_acl = 'private'
+    file_overwrite = False
+    custom_domain = False
+
+    def url(self, name, expire=3600):
+        # برای فایل‌های خصوصی، لینک موقت با زمان انقضا بساز
+        key = self._get_key(name)
+        return self.connection.meta.client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': self.bucket.name, 'Key': key},
+            ExpiresIn=expire,
+        )
 
 class PublicMediaStorage(S3Boto3Storage):
     """
