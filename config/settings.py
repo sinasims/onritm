@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
+    'shop',
+    'accounts',
+    'storages', # ArvanCloud Storage S3
 ]
 
 MIDDLEWARE = [
@@ -125,3 +130,49 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+MEDIA_URL = '/media/'
+# در حالت اجرای باید تغییر داده شود
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# برای دسترسی به فایل‌های محافظت شده (اختیاری)
+PROTECTED_MEDIA_ROOT = BASE_DIR / 'protected_media'
+
+# ============================================
+# ArvanCloud S3-like Object Storage Settings
+# ============================================
+
+# اطلاعات دسترسی به آرون
+AWS_ACCESS_KEY_ID = 'f28d69d6-99f5-4188-ad79-8e8741f4320d'          # کلید دسترسی آرون
+AWS_SECRET_ACCESS_KEY = 'e5a24dd622395f5401194ea5951601ccef26b5a3929bfc12a2655e47b222a024'      # کلید مخفی آرون
+AWS_STORAGE_BUCKET_NAME = 'onritm-media'  # نام باکتت روی آرون
+
+# تنظیمات منطقه و آدرس endpoint - حتماً بر اساس منطقه باکتی که ساختی!
+AWS_S3_REGION_NAME = 'ir-tbz-sh1'          # منطقه تهران
+AWS_S3_ENDPOINT_URL = 'https://s3.ir-tbz-sh1.arvanstorage.ir'   # آدرس endpoint آرون
+
+# تنظیمات امنیتی
+AWS_QUERYSTRING_AUTH = False   # این رو False بذار تا URLهایی که ساخته می‌شن کلید نداشته باشن؛ خودمون جداگانه لینک امن می‌سازیم
+
+# زمان منقضی شدن لینک دانلود (بر حسب ثانیه) - برای فایل‌های خصوصی استفاده میشه
+AWS_QUERYSTRING_EXPIRE = 3600  # 1 ساعت (یا هر مقداری که خودت صلاح می‌دونی)
+
+
+# ============================================
+# ArvanCloud S3-like Object Storage Backends
+# ============================================
+
+# تنظیمات پیش‌فرض جنگو برای ذخیره‌سازی فایل‌ها
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.InMemoryStorage", # برای کش کردن موقتی فایل‌ها
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# کلاس‌های استوریج سفارشی برای فایل‌های عمومی و خصوصی
+DEFAULT_FILE_STORAGE = 'storage_backends.PublicMediaStorage' # برای فیلدهایی که استوریج خاصی براشون تعریف نکردیم (مثلاً کاور)
+PRIVATE_FILE_STORAGE = 'storage_backends.PrivateMediaStorage' # برای فایل‌های خصوصی (فایل اصلی MP3)
