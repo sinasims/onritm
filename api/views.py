@@ -192,5 +192,15 @@ class CheckoutView(APIView):
         order_serializer = OrderSerializer(order)
         return Response(order_serializer.data, status=status.HTTP_201_CREATED)
     
+# api/views.py
+from rest_framework.permissions import IsAuthenticated
+from .serializers import OrderSerializer
 
+class UserOrdersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
     

@@ -4,7 +4,7 @@ from .views import (
     TrackListView, TrackDetailView,
     MoodListView, GenreListView,
     CartView, AddToCartView, RemoveFromCartView,
-    CheckoutView
+    CheckoutView, UserOrdersView
 )
 from shop.views import DownloadTrackView
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('cart/remove/', RemoveFromCartView.as_view(), name='cart-remove'),
 
     path('checkout/', CheckoutView.as_view(), name='checkout'),
+    path('orders/', UserOrdersView.as_view(), name='user-orders'),
 
     path('download/<int:order_item_id>/', DownloadTrackView.as_view(), name='download'),
 ]

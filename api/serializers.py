@@ -78,9 +78,6 @@ class CartSerializer(serializers.ModelSerializer):
         return obj.get_total_price()
     
 # api/serializers.py
-from rest_framework import serializers
-from shop.models import Order
-
 class CheckoutSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=100)
     last_name = serializers.CharField(max_length=100)
@@ -88,7 +85,30 @@ class CheckoutSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=15)
     address = serializers.CharField(required=False, allow_blank=True)
 
+# api/serializers.py (بخش اضافه شده)
+from shop.models import Order, OrderItem
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    track_title = serializers.CharField(source='track.title_fa', read_only=True)
+    track_cover = serializers.ImageField(source='track.cover_image', read_only=True)
+    total_price_item = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'track', 'track_title', 'track_cover', 'quantity', 'price_at_purchase', 'total_price_item']
+
+    def get_total_price_item(self, obj):
+        return obj.get_total_price()
+
 class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    total_price_display = serializers.SerializerMethodField()
+
     class Meta:
         model = Order
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'total_price', 'status', 'created_at']
+        fields = ['id', 'user', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'total_price', 'total_price_display', 'status', 'created_at', 'items']
+
+    def get_total_price_display(self, obj):
+        return f"{obj.total_price:,} تومان"
+
+
