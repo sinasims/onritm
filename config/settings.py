@@ -218,7 +218,13 @@ SIMPLE_JWT = {
 }
 
 # تنظیمات sms.ir (از پنل خودت دریافت کن)
+# this is SansBox
 SMS_IR_API_KEY = 'pWZFBzaFeQxIU3DQNgGqN9akHR0nPEW1BDxCVRNaBL32VHIl'
+# this main API KEY
+# SMS_IR_API_KEY = 'UHnbMRgzKGuqy1OW5WBneYS6XofSWVbMK6E1pz2vXxbwgENF'
+
+# template ID for OTP
+SMS_IR_TEMPLATE_ID = '667926'
 
 # تنظیمات زرین پال
 ZARINPAL_CONFIG = {

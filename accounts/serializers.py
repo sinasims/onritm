@@ -47,3 +47,12 @@ class ChangePasswordSerializer(serializers.Serializer):
         if attrs['new_password'] != attrs['confirm_new_password']:
             raise serializers.ValidationError({"confirm_new_password": "رمزهای جدید مطابقت ندارند."})
         return attrs
+    
+class RequestOTPSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+
+class VerifyOTPSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+    code = serializers.CharField(max_length=6)
+
+    

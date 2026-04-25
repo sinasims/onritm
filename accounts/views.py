@@ -5,10 +5,13 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from rest_framework import serializers
 from .serializers import (
-    RegisterSerializer, LoginSerializer, UserSerializer, ChangePasswordSerializer
+    RegisterSerializer, LoginSerializer, UserSerializer, ChangePasswordSerializer, VerifyOTPSerializer, RequestOTPSerializer
 )
-from .models import User  # اگر مدل سفارشی را در accounts دارید
+from .models import User, OTPCode  # اگر مدل سفارشی را در accounts دارید
+from .utils import send_sms_via_smsir
+
 
 class RegisterView(APIView):
     def post(self, request):
@@ -80,3 +83,62 @@ class LogoutView(APIView):
             return Response({'message': 'خروج موفقیت‌آمیز بود.'})
         except Exception:
             return Response({'error': 'توکن نامعتبر است.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class RequestOTPView(APIView):
+    def post(self, request):
+        serializer = RequestOTPSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        phone = serializer.validated_data['phone_number']
+        otp = OTPCode.generate_code(phone)
+        sent = send_sms_via_smsir(phone, otp.code)
+        print(sent)
+        if sent:
+            return Response({'message': 'کد تأیید ارسال شد.'})
+        else:
+            return Response({'error': 'ارسال پیامک ناموفق بود. لطفاً بعداً تلاش کنید.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class VerifyOTPLoginView(APIView):
+    def post(self, request):
+        serializer = VerifyOTPSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        phone = serializer.validated_data['phone_number']
+        code = serializer.validated_data['code']
+        
+        try:
+            otp = OTPCode.objects.get(phone_number=phone, code=code)
+        except OTPCode.DoesNotExist:
+            return Response({'error': 'کد نامعتبر است.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not otp.is_valid():
+            otp.delete()
+            return Response({'error': 'کد منقضی شده است.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # پیدا کردن یا ساخت کاربر
+        user, created = User.objects.get_or_create(
+            phone_number=phone,
+            defaults={'username': phone}  # در صورت نیاز username را با شماره تلفن پر کن
+        )
+        # اگر کاربر بدون username ساخته شده، می‌توانیم username را تصحیح کنیم
+        if created and not user.username:
+            user.username = f'user_{phone[-4:]}'
+            user.save()
+        
+        # پاک کردن OTP پس از استفاده
+        otp.delete()
+        
+        # تولید توکن JWT
+        refresh = RefreshToken.for_user(user)
+        user_serializer = UserSerializer(user)
+        return Response({
+            'user': user_serializer.data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'is_new': created,
+        })
+    
