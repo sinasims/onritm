@@ -1,11 +1,17 @@
 from rest_framework import generics, filters
 from django.shortcuts import get_object_or_404
-from shop.models import Singer, Track, Mood, Genre
+from shop.models import Singer, Track, Mood, Genre, Cart, Order, OrderItem, CartItem
 from .serializers import (
     SingerListSerializer, SingerDetailSerializer,
     TrackListSerializer, TrackDetailSerializer,
-    MoodSerializer, GenreSerializer
+    MoodSerializer, GenreSerializer, CartSerializer, CartItemSerializer,
+    CheckoutSerializer, OrderSerializer
 )
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.db import transaction
+from rest_framework.permissions import IsAuthenticated
 
 class SingerListView(generics.ListAPIView):
     queryset = Singer.objects.all().order_by('order', 'name_fa')
@@ -51,14 +57,6 @@ class MoodListView(generics.ListAPIView):
 class GenreListView(generics.ListAPIView):
     queryset = Genre.objects.all().order_by('order', 'name_fa')
     serializer_class = GenreSerializer
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from shop.models import Cart, CartItem, Track
-from .serializers import CartSerializer, CartItemSerializer
-from django.utils import timezone
 
 class CartView(APIView):
     def get_cart(self, request):
@@ -129,14 +127,6 @@ class RemoveFromCartView(APIView):
         item.delete()
         return Response({'message': 'removed'}, status=status.HTTP_200_OK)
 
-# api/views.py (قسمت اضافه شده)
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.db import transaction
-from shop.models import Cart, Order, OrderItem
-from .serializers import CheckoutSerializer, OrderSerializer
-
 class CheckoutView(APIView):
     def get_cart(self, request):
         # همان منطقی که در CartView استفاده کردیم
@@ -191,10 +181,6 @@ class CheckoutView(APIView):
         # برگرداندن اطلاعات سفارش
         order_serializer = OrderSerializer(order)
         return Response(order_serializer.data, status=status.HTTP_201_CREATED)
-    
-# api/views.py
-from rest_framework.permissions import IsAuthenticated
-from .serializers import OrderSerializer
 
 class UserOrdersView(APIView):
     permission_classes = [IsAuthenticated]
@@ -203,4 +189,5 @@ class UserOrdersView(APIView):
         orders = Order.objects.filter(user=request.user).order_by('-created_at')
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
-    
+
+

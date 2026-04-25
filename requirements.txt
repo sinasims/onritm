@@ -6,3 +6,5 @@ django-cors-headers
 django-storages 
 boto3
 requests
+djangorestframework-simplejwt 
+smsir-python

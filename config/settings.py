@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
     'shop',
     'accounts',
@@ -48,7 +49,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'api.middleware.APIKeyMiddleware', 
+    # برای استفاده کردن از middleware and apikey گزینه زیر باید فعال باشه
+    # 'api.middleware.APIKeyMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -196,11 +198,29 @@ CSRF_TRUSTED_ORIGINS = [
 
 API_SECRET_KEY = 'sinarahmani123456789'
 
+# تنظیمات DRF
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 12,
 }
 
+# تنظیمات JWT (اختیاری، می‌توانید زمان انقضا و ... را تنظیم کنید)
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# تنظیمات sms.ir (از پنل خودت دریافت کن)
+SMS_IR_API_KEY = 'pWZFBzaFeQxIU3DQNgGqN9akHR0nPEW1BDxCVRNaBL32VHIl'
+
+# تنظیمات زرین پال
 ZARINPAL_CONFIG = {
     "MERCHANT_ID": "f61e1794-23aa-4367-adf9-b37b3f56fa9f",
     "REQUEST_URL": "https://sandbox.zarinpal.com/pg/v4/payment/request.json",
